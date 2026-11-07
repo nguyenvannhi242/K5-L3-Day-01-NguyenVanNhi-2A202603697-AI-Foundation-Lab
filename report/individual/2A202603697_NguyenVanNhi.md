@@ -1,7 +1,5 @@
 # Báo cáo cá nhân — Day 01: Lọc tin nhắn rác bằng ML, DL, Embedding và LLM
 
-- **MSSV:** 2A202603697
-- **Họ và tên:** NGUYỄN VĂN NHI
 - **SEED** (in ở ô đầu notebook): 7162
 
 ## 1. Bằng chứng
@@ -97,3 +95,13 @@ Bảng so sánh 5 mô hình ở cuối Phần 5 (Phần 4 LLM chưa chạy do ch
 ## 6. Phương án cho sản phẩm thật
 
 ## 7. AI log và điều đã học
+
+### Bảng AI log
+
+| Phần | Bạn hỏi AI gì (prompt) | AI trả lời/viết gì | Bạn đã sửa / kiểm chứng gì |
+| --- | --- | --- | --- |
+| **Phần 0 & 1** (Data Leakage & BoW + LogReg) | Hỏi đánh giá câu trả lời câu 0.1; gợi ý cú pháp NumPy cho `vectorize`, `sigmoid`, `predict_proba`, `train_logreg`, `metrics`; debug lỗi `IndexError: index 9 is out of bounds for axis 1 with size 3`; giải thích dấu cập nhật trọng số từ `"free"` và lỗi phương pháp luận ở bài Bắt lỗi 1. | Giải thích khái niệm *generalization* (tổng quát hoá); hướng dẫn dùng `np.zeros`, toán tử nhân ma trận `@`, đạo hàm `X.T @ error / n`; chỉ ra lỗi gán cứng kích thước `(2, 3)` trong `vectorize` và lỗi vừa viết biểu thức vừa `return tên_hàm` trong `sigmoid`; phân tích 2 lỗi Data Leakage và dùng Accuracy trên dữ liệu lệch. | Tự gõ lại code hoàn chỉnh, sửa `(2, 3)` thành `(len(texts), len(vocab))`, sửa `return` trả về giá trị biểu thức, chạy lại `_run_check` cho 1.1–1.4 đạt ✅ và đối chiếu trực tiếp với danh sách 10 tin bị đoán sai. |
+| **Phần 2** (Deep Learning — MLP) | Hướng dẫn cú pháp PyTorch cho `build_mlp` (TODO 2.1) và 5 bước trong vòng lặp huấn luyện `train_mlp` (TODO 2.2); giải thích điều gì xảy ra nếu quên `opt.zero_grad()`. | Hướng dẫn ghép `nn.Sequential(nn.Linear, nn.ReLU, nn.Linear)`; giải thích 5 bước: `opt.zero_grad()`, `model(xb).squeeze(1)`, `loss_fn`, `loss.backward()`, `opt.step()` và hiện tượng cộng dồn gradient cũ làm lệch hướng cập nhật nếu quên xoá gradient. | Tự điền code vào `build_mlp` và `train_mlp`, kiểm tra tổng số tham số (`49` tham số ở bài test) và chạy thực nghiệm so sánh đường cong loss cũng như thí nghiệm bỏ `ReLU`. |
+| **Phần 3** (Embedding & Semantic Search) | Hỗ trợ hoàn thiện hàm `cosine_similarity`, `top_k_similar` (nhân ma trận không dùng vòng lặp), `knn_predict`; giải thích kết quả Thí nghiệm 3.B (6 câu tricky), câu hỏi thảo luận Phần 3 và bài Bắt lỗi 2 (`top_k_similar_v2`). | Cung cấp cách tính chuẩn Euclid `np.linalg.norm`, nhân ma trận `M @ q`, đảo chiều `np.argsort(scores)[::-1][:k]`; giải thích vì sao Encoder gom cụm ngữ nghĩa dù không train lọc spam và vì sao MLP head ít cải thiện hơn trên vector 384 chiều đã khả phân tuyến tính. | Kiểm tra điều kiện chia cho 0 khi gặp vector toàn `0`, chạy `_run_check` 3.1–3.3 đạt ✅, đối chiếu kết quả thực tế (BoW đúng 4/6, Encoder+LogReg đúng 4/6) và tự viết lại câu trả lời theo ý hiểu cá nhân. |
+| **Phần 4** (LLM API, Prompting & DeepSeek) | Hỗ trợ hoàn thiện `call_openai`, `build_classification_prompt`, `parse_label`, `llm_classify_batch`; giải thích bài Bắt lỗi 3 (`parse_label_v2`); cấu hình đọc `DEEPSEEK_API_KEY` từ file `.env` để chạy thật Phần 4 với DeepSeek. | Viết hàm tạo prompt zero-shot/few-shot, dùng regex chuẩn hoá chuỗi trả về và bắt trường hợp `"not spam"` / `None` (`n_invalid`); thêm cấu hình `"deepseek"` (`deepseek-chat` & `deepseek-reasoner`) tương thích chuẩn OpenAI SDK và nạp `.env` an toàn. | Kiểm tra không để lộ API key ra output, chạy unit test giả lập (`MagicMock`) đạt ✅, chạy thực nghiệm trực tiếp với DeepSeek API trên tập `SUB` 40 tin (4a, 4b, 4c) và ghi nhận độ trễ / chi phí thực tế. |
+| **Phần 5** (Rà soát tổng hợp, Tính tay & Thử thách) | Nhờ rà soát các mục còn thiếu trong notebook theo `RUBRIC.md`, kiểm tra công thức 5 câu tính tay (`HAND_CALC`), gợi ý cấu trúc code cho Thử thách cá nhân #5 và phản ánh cuối bài (Pareto, SLA, Stress test 50 case khó, kiến trúc Router). | Liệt kê checklist các mục cần hoàn thiện; trình bày từng bước tính tay (`0.87`, `0.50`, `0.73`, `0.60`, `10.50`); soạn khung kiểm thử 4 câu tự viết cho Đề #5 và phân tích đánh đổi độ trễ/chi phí cho bài toán 10 triệu SMS/ngày. | Tự kiểm chứng lại các phép tính tay, tự viết lại các câu trả lời thảo luận theo ngôn từ cá nhân, đối chiếu kết quả chạy thực tế của 4 câu thử thách (`BoW` đoán nhầm 2 câu spam né từ khoá, `Emb+LR` đúng cả 4/4) và chạy kiểm tra cuối bài. |
